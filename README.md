@@ -1,54 +1,102 @@
-# React + TypeScript + Vite
+React 기반 개인 포트폴리오 프로젝트
+1. 프로젝트 개요
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+본 프로젝트는 프론트엔드 프레임워크 React를 활용한 UI 구성 경험과 컴포넌트 기반 설계 감각을 정리하기 위한 개인 포트폴리오이다.
+프론트엔드 전문 개발자가 아니라, 백엔드·시스템 중심 엔지니어가 프론트엔드를 어떤 수준과 관점으로 다루는지를 보여주는 것을 목표로 한다.
 
-Currently, two official plugins are available:
+즉, 시각적 완성도보다는
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+컴포넌트 분리 기준
 
-## Expanding the ESLint configuration
+상태 흐름에 대한 이해
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+UI 구조를 시스템 관점에서 정리하는 능력
+을 검증하는 목적의 프로젝트다.
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+2. 프로젝트 목적
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+React의 기본적인 컴포넌트 구조와 상태 관리 흐름을 실제 화면 단위로 정리
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+단순 구현이 아닌 **“어떤 책임을 어디까지 프론트엔드에서 가져가는가”**에 대한 판단 연습
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+백엔드 중심 개발자가 프론트엔드를 협업 관점에서 이해하고 설계할 수 있음을 증명
+
+3. 기술 스택
+
+React
+
+TypeScript
+
+Vite
+
+HTML / CSS
+
+외부 상태 관리 라이브러리나 UI 프레임워크는 의도적으로 사용하지 않았다.
+이는 React의 기본적인 렌더링 흐름과 상태 전달 구조를 명확히 이해하기 위함이다.
+
+4. 주요 구현 내용
+4.1 컴포넌트 기반 UI 구성
+
+화면을 기능 단위 컴포넌트로 분리
+
+재사용 가능성과 책임 범위를 기준으로 컴포넌트 설계
+
+4.2 상태 흐름 관리
+
+React 기본 상태 관리 방식(useState, props)을 중심으로 구성
+
+불필요한 전역 상태를 만들지 않도록 구조 단순화
+
+4.3 화면 전환 및 사용자 인터랙션
+
+사용자 입력 → 상태 변경 → UI 반영의 흐름을 명확히 드러내는 구조
+
+복잡한 UX보다는 동작 예측 가능성을 우선
+
+5. 설계 시 의도적으로 하지 않은 것들
+
+Redux, Zustand 등 외부 상태 관리 라이브러리 도입 ❌
+
+과도한 애니메이션 및 시각 효과 ❌
+
+프론트엔드 단독 아키텍처 과시 ❌
+
+이 프로젝트는 프론트엔드 전문성을 증명하기 위한 것이 아니라,
+“백엔드/시스템 개발자가 프론트엔드를 어떻게 이해하고 다루는가”를 보여주기 위한 범위로 제한했다.
+
+6. 실행 및 확인 방법
+npm install
+npm run dev
+
+
+또는 저장소에 포함된 시연 영상을 통해 전체 동작 흐름을 확인할 수 있다.
+
+7. 시연 영상
+
+포트폴리오시연.mp4
+
+실제 화면 흐름과 사용자 인터랙션을 기준으로 녹화
+
+8. 이 포트폴리오의 위치
+
+이 저장소는 메인 포트폴리오가 아닌 보조 포트폴리오에 해당한다.
+
+메인: 실시간·이벤트 기반 시스템 / 백엔드·플랫폼 설계
+
+보조: 프론트엔드 구조 이해 및 협업 가능성 증명
+
+프론트엔드 구현 자체보다는,
+**“프론트엔드를 설계 관점에서 다룰 수 있는 개발자”**임을 보여주는 용도로 유지한다.
+
+9. 향후 개선 방향 (선택)
+
+컴포넌트 설계 기준에 대한 문서 보강
+
+실제 백엔드 API 연동 예제 추가
+
+화면 단위 책임 분리 리팩터링
+
+마지막 한 줄 요약
+
+이 프로젝트는 프론트엔드 실력을 과시하기 위한 것이 아니라,
+시스템 중심 개발자가 프론트엔드를 어떻게 바라보고 정리하는지를 보여주는 기록이다.
