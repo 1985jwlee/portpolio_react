@@ -135,7 +135,7 @@ npm run dev
 
 **메인 포트폴리오의 Admin Dashboard 기술 검증**
 
-[Server-authoritative Architecture](메인 링크)에서 
+[Server-authoritative Architecture](https://github.com/1985jwlee/portpolio_main)에서 
 설계한 운영 대시보드를 구현하기 위해 
 React 상태 관리 및 동적 UI 구성을 검증한 사례입니다.
 
