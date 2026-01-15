@@ -116,6 +116,82 @@ App
 모든 상태는 전역 상태 스토어(Zustand)에 집중되어 있으며,  
 각 컴포넌트는 상태를 직접 소유하지 않고 **표현과 입력 역할만 담당**한다.
 
+## 📐 State Management Architecture
+
+```mermaid
+graph TB
+    subgraph "User Interface"
+        Actions[InspectorActions<br/>Add/Delete Objects]
+        CompList[ComponentList<br/>Object List]
+        CompEditor[ComponentEditor<br/>Settings Editor]
+        CompPreview[ComponentPreview<br/>Visual Preview]
+        SnapshotMgr[SnapshotManager<br/>Save/Load]
+    end
+    
+    subgraph "State Management - Zustand"
+        Store[Global State Store]
+        
+        subgraph "State Structure"
+            Objects[Objects Array<br/>id, settings]
+            Selected[Selected Object ID]
+            Settings[Object Settings<br/>per object]
+        end
+    end
+    
+    subgraph "State Operations"
+        AddObj[Add Object<br/>+ Generate ID]
+        DelObj[Delete Object<br/>+ Clean State]
+        UpdateSet[Update Settings<br/>+ Validate]
+        Select[Select Object]
+    end
+    
+    subgraph "Snapshot System"
+        Serialize[Serialize State<br/>→ JSON]
+        Deserialize[Deserialize JSON<br/>→ State]
+        Storage[(localStorage<br/>or API)]
+    end
+    
+    Actions -->|Dispatch Action| AddObj
+    Actions -->|Dispatch Action| DelObj
+    
+    CompList -->|Click| Select
+    CompEditor -->|Change| UpdateSet
+    
+    AddObj --> Store
+    DelObj --> Store
+    UpdateSet --> Store
+    Select --> Store
+    
+    Store --> Objects
+    Store --> Selected
+    Store --> Settings
+    
+    Objects -.->|Subscribe| CompList
+    Selected -.->|Subscribe| CompEditor
+    Settings -.->|Subscribe| CompEditor
+    Objects -.->|Subscribe| CompPreview
+    
+    SnapshotMgr -->|Save| Serialize
+    SnapshotMgr -->|Load| Deserialize
+    
+    Serialize --> Storage
+    Storage --> Deserialize
+    
+    Deserialize --> Store
+    
+    style Store fill:#4a90e2
+    style Serialize fill:#f39c12
+    style CompEditor fill:#2ecc71
+```
+
+### 상태 흐름
+
+- **Action** → **Store** → **View** (단방향)
+- **Snapshot**: State ↔ JSON 직렬화
+- **Subscribe**: 상태 변경 시 자동 렌더링
+
+
+
 ---
 
 ## 5. 핵심 구현 내용
