@@ -2,10 +2,9 @@
 
 ## 🔗 이 프로젝트의 위치
 
-> **이 프로젝트는 [Event-driven Real-time Game Platform](https://github.com/1985jwlee/portpolio_main)의 Admin Dashboard 프로토타입입니다.**
+> **이 프로젝트는 [Event-driven Real-time Game Platform](https://github.com/1985jwlee/portpolio_main)의 Admin Dashboard 선행 검증 프로토타입입니다.**
 
 ### 메인 포트폴리오와의 관계
-
 ```
 [ Main: 게임 서버 설계 ]
     ↓
@@ -13,28 +12,41 @@
     Event-driven Architecture
     Server-authoritative 구조
     ↓
-[ React: Admin Dashboard 구현 ]
+[ React: Admin Dashboard 구현 검증 ]
     ↓
     UI 기반 오브젝트 관리
     상태 저장/복원 메커니즘
     운영 도구 프로토타입
 ```
 
-### 검증하는 능력
+### 이 프로토타입을 먼저 만든 이유
 
-이 프로젝트는 **"설계한 시스템의 운영 도구를 직접 구현할 수 있는가"**를 증명합니다.
+메인 포트폴리오에서 **Admin Dashboard를 설계**할 때, 한 가지 가정이 생겼다.
+
+> "서버 오브젝트의 상태를 추가·삭제·저장·복원하는 운영 도구를,  
+> 실제로 동작하는 UI로 구현할 수 있는가?"
+
+서버 설계를 먼저 문서화하고 구현을 뒤로 미루는 방식은,  
+**"설계만 알고 구현은 못하는 것 아닌가"** 라는 의심을 남긴다.
+
+그래서 메인 포트폴리오의 핵심 개념을 UI 레벨로 축소해 **실제 동작하는 형태로 먼저 증명**했다.
+
+### 이 경험이 메인 포트폴리오로 이어진 것들
+
+- 서버의 In-memory 상태 관리를 UI로 옮기면 **Zustand Single Source of Truth 구조**와 동일한 문제임을 확인했다
+- Redis Hot Snapshot / MongoDB Cold Snapshot의 저장·복원 메커니즘이  
+  **메모리 스냅샷 / JSON Export-Import**로 그대로 대응됨을 구현으로 증명했다
+- "UI는 상태의 결과물"이라는 판단이 **서버 상태 설계 사고방식과 완전히 일치**함을 확인했다
+
+### 검증하는 능력
 
 | Main Portfolio | React Portfolio |
 |----------------|-----------------|
-| 서버 오브젝트 상태 관리 | UI 오브젝트 상태 관리 |
-| Event Sourcing | State Management (Zustand) |
-| Snapshot 복구 (서버) | 저장/불러오기 (클라이언트) |
-| 운영 대시보드 **설계** | 운영 도구 **구현** |
-
-### 역할 명확화
-
-- 🎯 **메인**: 서버 아키텍처 설계
-- 🛠️ **이 프로젝트**: Admin Dashboard 프로토타입 기술 검증
+| Game Server State (In-memory) | UI State (Zustand Store) |
+| Event Sourcing | State Change → Re-render (단방향 흐름) |
+| Redis Hot Snapshot | 메모리 스냅샷 (이름 붙여 저장·전환) |
+| MongoDB Cold Snapshot | JSON Export / Import |
+| 운영 대시보드 **설계** | 운영 도구 **구현 · 동작 검증** |
 
 ### 핵심 메시지
 
@@ -148,7 +160,7 @@ graph TB
     subgraph "Snapshot System"
         Serialize[Serialize State<br/>→ JSON]
         Deserialize[Deserialize JSON<br/>→ State]
-        Storage[(localStorage<br/>or API)]
+        Storage[(JSON File<br/>Export / Import)]
     end
     
     Actions -->|Dispatch Action| AddObj
@@ -202,6 +214,9 @@ graph TB
 - 각 컴포넌트는 고유 ID와 필드값을 보유
 - 삭제 시 상태 불일치나 잔존 데이터가 발생하지 않도록 설계
 
+<details>
+<summary><b>구현 코드 보기</b></summary>
+    
 ```typescript
 // stores/inspectorStore.ts
 addComponent: (type, fields) =>
@@ -210,11 +225,7 @@ addComponent: (type, fields) =>
       ...state.gameObject,
       components: [
         ...state.gameObject.components,
-        {
-          id: uuidv4(),
-          type,
-          fields,
-        },
+        { id: uuidv4(), type, fields },
       ],
     },
   })),
@@ -228,6 +239,8 @@ removeComponent: (id) =>
   })),
 ```
 
+</details>
+
 ---
 
 ### 5.2 오브젝트 설정값 관리
@@ -236,6 +249,9 @@ removeComponent: (id) =>
 - 설정 변경은 즉시 전역 상태에 반영
 - UI는 항상 상태의 결과로만 렌더링됨
 
+<details>
+<summary><b>구현 코드 보기</b></summary>
+    
 ```typescript
 updateField: (componentId, fieldName, newValue) =>
   set((state) => ({
@@ -255,6 +271,8 @@ updateField: (componentId, fieldName, newValue) =>
   })),
 ```
 
+</details>
+
 ---
 
 ### 5.3 상태 저장 (JSON Export)
@@ -263,6 +281,10 @@ updateField: (componentId, fieldName, newValue) =>
 - JSON 직렬화가 가능한 형태로 저장
 - UI 상태가 아닌 **순수 데이터 상태만 저장**
 
+> 이 구조는 메인 포트폴리오의 **MongoDB Cold Snapshot**에 대응한다.
+
+<details>
+<summary><b>구현 코드 보기</b></summary>
 ```typescript
 const handleSave = () => {
   const json = JSON.stringify(gameObject, null, 2)
@@ -276,6 +298,8 @@ const handleSave = () => {
 }
 ```
 
+</details>
+
 ---
 
 ### 5.4 상태 불러오기 및 복원
@@ -284,6 +308,10 @@ const handleSave = () => {
 - 컴포넌트 목록, 필드값, 선택 상태가 모두 동일하게 복원
 - 데이터 상태와 UI 상태의 불일치가 발생하지 않도록 구성
 
+> 이 구조는 백엔드 시스템에서의 **스냅샷 복구 개념을 UI 상태 관리로 축소 적용한 예제**에 해당한다.
+
+<details>
+<summary><b>구현 코드 보기</b></summary>
 ```typescript
 const handleLoad = (e: React.ChangeEvent<HTMLInputElement>) => {
   const file = e.target.files?.[0]
@@ -301,8 +329,7 @@ const handleLoad = (e: React.ChangeEvent<HTMLInputElement>) => {
 }
 ```
 
-> 이 구조는 백엔드 시스템에서의 **스냅샷 복구 개념을  
-> UI 상태 관리로 축소 적용한 예제**에 해당한다.
+</details>
 
 ---
 
@@ -310,14 +337,19 @@ const handleLoad = (e: React.ChangeEvent<HTMLInputElement>) => {
 
 - 여러 상태를 이름을 붙여 저장
 - 저장된 스냅샷 목록에서 선택하여 즉시 복원
-- 메인 포트폴리오의 Redis/MongoDB 스냅샷 개념을 UI로 구현
 
+> 메인 포트폴리오의 **Redis Hot Snapshot** 개념을 UI 레벨로 구현한 예제다.  
+> 복구 우선순위(Hot → Cold) 로직도 동일한 사고방식으로 설계되었다.
+
+<details>
+<summary><b>구현 코드 보기</b></summary>
+    
 ```typescript
 const saveSnapshot = () => {
   if (!snapshotName.trim()) return
-  setSnapshots([...snapshots, { 
-    name: snapshotName.trim(), 
-    data: gameObject 
+  setSnapshots([...snapshots, {
+    name: snapshotName.trim(),
+    data: gameObject
   }])
   setSnapshotName('')
 }
@@ -326,6 +358,8 @@ const loadSnapshot = (data: any) => {
   setGameObject(data)
 }
 ```
+
+</details>
 
 ---
 
